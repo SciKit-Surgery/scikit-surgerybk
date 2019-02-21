@@ -25,6 +25,7 @@ class BKMedicalDataSourceWorker():
         self.timeout = timeout
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(self.timeout)
         pass
 
     def request_stop(self):
