@@ -45,8 +45,8 @@ class BKMedicalDataSourceWorker():
     def connect_to_host(self, address, port):
         try:
             self.socket.connect((address, port))
-        except socket.error as msg:
-            print("An error: {:} has occured while trying to connect to: {:} port: {:}".format(msg, address, port))
+        except socket.error as error_msg:
+            print("An error: {:} has occured while trying to connect to: {:} with port: {:}".format(error_msg, address, port))
             self.socket.close()
         pass
 
@@ -57,7 +57,10 @@ class BKMedicalDataSourceWorker():
         pass
 
     def send_command_message(self, message):
-        self.socket.send(message)
+        bytes_sent = self.socket.send(message)
+        # Check the sent went OK.
+        if (bytes_sent != len(message)):
+            print("Failed to send message: {:} due to size mismatch: {:} different from {:} bytes sent.".format(message, len(message), bytes_sent))
         pass
 
 
