@@ -23,7 +23,7 @@ scikit-surgerybk
 
 Author: Thomas Dowrick
 
-scikit-surgerybk is a Python library for interfacing with BK ultrasound machines part of the `SNAPPY`_ software project, developed at the `Wellcome EPSRC Centre for Interventional and Surgical Sciences`_, part of `University College London (UCL)`_.
+scikit-surgerybk is a Python library for interfacing with BK ultrasound machines, and is part of the `SNAPPY`_ software project, developed at the `Wellcome EPSRC Centre for Interventional and Surgical Sciences`_, part of `University College London (UCL)`_.
 
 scikit-surgerybk supports Python 2.7 and Python 3.6.
 
