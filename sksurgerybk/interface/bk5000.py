@@ -25,18 +25,13 @@ class BKMedicalDataSourceWorker():
         self.timeout = timeout
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((TCP_IP, TCP_PORT))
-        self.socket.send(MESSAGE)
-        data = self.socket.recv(BUFFER_SIZE)
-        self.socket.close()
-        print "received data: ", data
         pass
 
     def request_stop(self):
         pass
 
     def disconnect_from_host(self):
-        if(self.socket.recv(BUFFER_SIZE)): # If the receive is not empty, disconnect
+        if self.socket.recv(BUFFER_SIZE) is not Empty: # If the receive is not empty, disconnect
             self.socket.close()
         pass
 
@@ -47,6 +42,11 @@ class BKMedicalDataSourceWorker():
         pass
 
     def connect_to_host(self, address, port):
+        try:
+            self.socket.connect((address, port))
+        except socket.error as msg:
+            print("An error: {:} has occured while trying to connect to: {:} port: {:}".format(msg, address, port))
+            self.socket.close()
         pass
 
     def parse_win_size_message(self, message):
@@ -56,10 +56,12 @@ class BKMedicalDataSourceWorker():
         pass
 
     def send_command_message(self, message):
+        self.socket.send(message)
         pass
 
 
     def receive_response_message(self, expected_size):
+        self.data = self.socket.recv(expected_size)
         pass
 
 
@@ -72,3 +74,8 @@ class BKMedicalDataSourceWorker():
 if __name__ == '__main__':
     print "instantiate the class"
     bkworker = BKMedicalDataSourceWorker(10, 50)
+    bkworker.connect_to_host(TCP_IP, TCP_PORT)
+    bkworker.send_command_message(MESSAGE)
+    bkworker.receive_response_message(BUFFER_SIZE)
+    bkworker.disconnect_from_host()
+    print "received data: ", bkworker.data
