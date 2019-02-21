@@ -1,0 +1,6 @@
+[run]
+omit = 
+        ./sksurgerybk/_version.py
+        ./sksurgerybk/__init__.py
+        ./sksurgerybk/__main__.py
+        ./sksurgerybk/ui/sksurgerybk_command_line.py
