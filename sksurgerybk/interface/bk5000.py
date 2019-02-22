@@ -22,6 +22,14 @@ class BKMedicalDataSoureActivator():
 class BKMedicalDataSourceWorker():
 
     def __init__(self, timeout, frames_per_second):
+        """ The DataSourceWorker constructor.
+
+        Sets a number of class members.
+
+        Parameters:
+        timeout(positive float): the timeout in seconds.
+        frames_per_second(positive integer): the expected fps from the BK scanner
+        """
         self.timeout = timeout
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,10 +51,19 @@ class BKMedicalDataSourceWorker():
         pass
 
     def connect_to_host(self, address, port):
+        """ Connects the client to the host/serverself.
+
+        Implements a try/except block to catch potential errors.
+
+        Parameters:
+        address(string): the IP address
+        port(integer): the port
+        """
         try:
             self.socket.connect((address, port))
         except socket.error as error_msg:
-            print("An error: {:} has occured while trying to connect to: {:} with port: {:}".format(error_msg, address, port))
+            print("An error: {:} has occured while trying to connect to: {:} \
+            with port: {:}".format(error_msg, address, port))
             self.socket.close()
         pass
 
@@ -57,10 +74,19 @@ class BKMedicalDataSourceWorker():
         pass
 
     def send_command_message(self, message):
+        """Send a message through the socket.
+
+        Implements a couple of checks to verify the
+        message has been sent correctly.
+
+        Parameters:
+        message(string): the message to be sent
+        """
         bytes_sent = self.socket.send(message)
         # Check the sent went OK.
         if (bytes_sent != len(message)):
-            print("Failed to send message: {:} due to size mismatch: {:} different from {:} bytes sent.".format(message, len(message), bytes_sent))
+            print("Failed to send message: {:} due to size mismatch: {:} \
+            different from {:} bytes sent.".format(message, len(message), bytes_sent))
         pass
 
 
