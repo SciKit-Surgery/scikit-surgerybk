@@ -11,10 +11,11 @@ MESSAGE = "Hello, world"
 
 
 #TODO
-class BKMedicalDataSoureActivator():
+class BKMedicalDataSourceActivator():
 
     def __init__(self):
         pass
+
     def load(self, context):
         pass
 
@@ -28,7 +29,8 @@ class BKMedicalDataSourceWorker():
 
         Parameters:
         timeout(positive float): the timeout in seconds.
-        frames_per_second(positive integer): the expected fps from the BK scanner
+        frames_per_second(positive integer): the expected fps from the \
+                                             BK scanner
         """
         self.timeout = timeout
         self.frames_per_second = frames_per_second
@@ -40,7 +42,8 @@ class BKMedicalDataSourceWorker():
         pass
 
     def disconnect_from_host(self):
-        if self.socket.recv(BUFFER_SIZE) is not Empty: # If the receive is not empty, disconnect
+        # If the receive is not empty, disconnect
+        if not self.socket.recv(BUFFER_SIZE):
             self.socket.close()
         pass
 
@@ -86,14 +89,13 @@ class BKMedicalDataSourceWorker():
         # Check the sent went OK.
         if (bytes_sent != len(message)):
             print("Failed to send message: {:} due to size mismatch: {:} \
-            different from {:} bytes sent.".format(message, len(message), bytes_sent))
+            different from {:} bytes sent.".format(message, len(message),
+                                                   bytes_sent))
         pass
-
 
     def receive_response_message(self, expected_size):
         self.data = self.socket.recv(expected_size)
         pass
-
 
     def receive_image(self, image):
         pass
@@ -101,11 +103,12 @@ class BKMedicalDataSourceWorker():
     def find_first_a_not_preceded_by_b(self, start_position, buf, a, b):
         pass
 
+
 if __name__ == '__main__':
-    print "instantiate the class"
+    print("instantiate the class")
     bkworker = BKMedicalDataSourceWorker(10, 50)
     bkworker.connect_to_host(TCP_IP, TCP_PORT)
     bkworker.send_command_message(MESSAGE)
     bkworker.receive_response_message(BUFFER_SIZE)
     bkworker.disconnect_from_host()
-    print "received data: ", bkworker.data
+    print("received data: {:}".format(bkworker.data))
