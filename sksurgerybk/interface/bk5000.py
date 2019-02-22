@@ -114,4 +114,4 @@ if __name__ == '__main__':
     bkworker.send_command_message(MESSAGE)
     bkworker.receive_response_message(BUFFER_SIZE)
     bkworker.disconnect_from_host()
-    print("received data: {:}".format(bkworker.data))
+    print("received data in client: {:}".format(bkworker.data))
