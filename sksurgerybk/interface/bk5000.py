@@ -42,7 +42,10 @@ class BKMedicalDataSourceWorker():
         pass
 
     def disconnect_from_host(self):
-        # If the receive is not empty, disconnect
+        """ Disconnects the client from the host.
+
+        Check a receive, if not empty, disconnect
+        """
         if not self.socket.recv(BUFFER_SIZE):
             self.socket.close()
         pass
