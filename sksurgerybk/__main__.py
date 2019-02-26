@@ -15,6 +15,6 @@ if __name__ == "__main__" and not __package__:
 
 # pylint: disable=wrong-import-position
 # from sksurgerybk.ui.sksurgerybk_command_line import main
-
-if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+#
+# if __name__ == "__main__":
+#     sys.exit(main(sys.argv[1:]))
