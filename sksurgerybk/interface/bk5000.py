@@ -88,7 +88,7 @@ class BKMedicalDataSourceWorker():
         Parameters:
         message(string): the message to be sent
         """
-        bytes_sent = self.socket.send(message)
+        bytes_sent = self.socket.send(message.encode())
         # Check the sent went OK.
         if (bytes_sent != len(message)):
             print("Failed to send message: {:} due to size mismatch: {:} \
