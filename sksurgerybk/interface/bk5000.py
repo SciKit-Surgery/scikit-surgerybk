@@ -16,11 +16,9 @@ class BKMedicalDataSourceActivator():
 
     def __init__(self):
         """The constructor"""
-        pass
 
     def load(self, context):
         """Load method"""
-        pass
 
 
 class BKMedicalDataSourceWorker():
@@ -43,7 +41,6 @@ class BKMedicalDataSourceWorker():
 
     def request_stop(self):
         """Method docstring"""
-        pass
 
     def disconnect_from_host(self):
         """ Disconnects the client from the host.
@@ -55,11 +52,9 @@ class BKMedicalDataSourceWorker():
 
     def stop_streaming(self):
         """Method docstring"""
-        pass
 
     def start_streaming(self):
         """Method docstring"""
-        pass
 
     def connect_to_host(self, address, port):
         """ Connects the client to the host/serverself.
@@ -79,11 +74,9 @@ class BKMedicalDataSourceWorker():
 
     def parse_win_size_message(self, message):
         """Method docstring"""
-        pass
 
     def generate_command_message(self, message):
         """Method docstring"""
-        pass
 
     def send_command_message(self, message):
         """Send a message through the socket.
@@ -107,10 +100,10 @@ class BKMedicalDataSourceWorker():
         self.data = self.socket.recv(expected_size)
 
     def receive_image(self, image):
-        pass
+        """Method docstring"""
 
-    def find_first_a_not_preceded_by_b(self, start_position, buf, a, b):
-        pass
+    def find_first_a_not_preceded_by_b(self, start_position, buf, char_a, char_b):
+        """Method docstring"""
 
 
 # if __name__ == '__main__':
