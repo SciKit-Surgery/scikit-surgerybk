@@ -1,3 +1,4 @@
+"""This module sets the connection to the BK scanner"""
 
 import socket
 import logging
@@ -10,17 +11,20 @@ BUFFER_SIZE = 1024
 MESSAGE = "Hello, world"
 
 
-#TODO
 class BKMedicalDataSourceActivator():
+    """A class"""
 
     def __init__(self):
+        """The constructor"""
         pass
 
     def load(self, context):
+        """Load method"""
         pass
 
 
 class BKMedicalDataSourceWorker():
+    """This class sets the TCP connection with the BK scanner"""
 
     def __init__(self, timeout, frames_per_second):
         """ The DataSourceWorker constructor.
@@ -36,9 +40,9 @@ class BKMedicalDataSourceWorker():
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(self.timeout)
-        pass
 
     def request_stop(self):
+        """Method docstring"""
         pass
 
     def disconnect_from_host(self):
@@ -48,12 +52,13 @@ class BKMedicalDataSourceWorker():
         """
         if not self.socket.recv(BUFFER_SIZE):
             self.socket.close()
-        pass
 
     def stop_streaming(self):
+        """Method docstring"""
         pass
 
     def start_streaming(self):
+        """Method docstring"""
         pass
 
     def connect_to_host(self, address, port):
@@ -71,12 +76,13 @@ class BKMedicalDataSourceWorker():
             print("An error: {:} has occured while trying to connect to: {:} \
             with port: {:}".format(error_msg, address, port))
             self.socket.close()
-        pass
 
     def parse_win_size_message(self, message):
+        """Method docstring"""
         pass
 
     def generate_command_message(self, message):
+        """Method docstring"""
         pass
 
     def send_command_message(self, message):
@@ -86,19 +92,19 @@ class BKMedicalDataSourceWorker():
         message has been sent correctly.
 
         Parameters:
-        message(string): the message to be sent
+        message(bytes string in Python3): the message to be sent
         """
         bytes_sent = self.socket.send(message)
         # Check the sent went OK.
-        if (bytes_sent != len(message)):
+        if bytes_sent != len(message):
             print("Failed to send message: {:} due to size mismatch: {:} \
-            different from {:} bytes sent.".format(message, len(message),
+            different from {:} bytes sent.".format(message,
+                                                   len(message),
                                                    bytes_sent))
-        pass
 
     def receive_response_message(self, expected_size):
+        """Receive a message"""
         self.data = self.socket.recv(expected_size)
-        pass
 
     def receive_image(self, image):
         pass
@@ -107,11 +113,11 @@ class BKMedicalDataSourceWorker():
         pass
 
 
-if __name__ == '__main__':
-    print("instantiate the class")
-    bkworker = BKMedicalDataSourceWorker(10, 50)
-    bkworker.connect_to_host(TCP_IP, TCP_PORT)
-    bkworker.send_command_message(MESSAGE)
-    bkworker.receive_response_message(BUFFER_SIZE)
-    bkworker.disconnect_from_host()
-    print("received data in client: {:}".format(bkworker.data))
+# if __name__ == '__main__':
+#     print("instantiate the class")
+#     bkworker = BKMedicalDataSourceWorker(10, 50)
+#     bkworker.connect_to_host(TCP_IP, TCP_PORT)
+#     bkworker.send_command_message(MESSAGE)
+#     bkworker.receive_response_message(BUFFER_SIZE)
+#     bkworker.disconnect_from_host()
+#     print("received data in client: {:}".format(bkworker.data))
