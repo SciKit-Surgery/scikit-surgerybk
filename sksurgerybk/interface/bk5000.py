@@ -34,7 +34,7 @@ class BKMedicalDataSourceWorker():
         frames_per_second(positive integer): the expected fps from the \
                                              BK scanner
         """
-        self.data = empty
+        self.data = None
         self.timeout = timeout
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
