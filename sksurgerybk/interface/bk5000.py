@@ -97,8 +97,19 @@ class BKMedicalDataSourceWorker():
                                                    bytes_sent))
 
     def receive_response_message(self, expected_size):
-        """Receive a message"""
+        """Receive a message
+
+        Stores it under the data class member
+
+        Parameters:
+        expected_size(int): the receive message size in bytes
+        """
         self.data = self.socket.recv(expected_size)
+        if len(self.data) != expected_size:
+            print("Failed to receive message: {:} due to size mismatch: {:} \
+            different from {:} bytes received.".format(self.data,
+                                                       len(self.data),
+                                                       expected_size))
 
     def receive_image(self, image):
         """Method docstring"""
@@ -106,13 +117,3 @@ class BKMedicalDataSourceWorker():
     def find_first_a_not_preceded_by_b(self, start_position, buf,
                                        char_a, char_b):
         """Method docstring"""
-
-
-# if __name__ == '__main__':
-#     print("instantiate the class")
-#     bkworker = BKMedicalDataSourceWorker(10, 50)
-#     bkworker.connect_to_host(TCP_IP, TCP_PORT)
-#     bkworker.send_command_message(MESSAGE)
-#     bkworker.receive_response_message(BUFFER_SIZE)
-#     bkworker.disconnect_from_host()
-#     print("received data in client: {:}".format(bkworker.data))
