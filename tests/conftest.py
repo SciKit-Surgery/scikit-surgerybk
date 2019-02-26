@@ -43,11 +43,8 @@ class TestingServer():
 @pytest.fixture
 def socket_var():
     """A bunch of socket related variables"""
-    pytest.TCP_IP = TCP_IP
-    pytest.TCP_PORT = TCP_PORT
-    pytest.BUFFER_SIZE = BUFFER_SIZE
-    return pytest
-
+    socket_var = {"TCP_IP": TCP_IP, "TCP_PORT": TCP_PORT}
+    return socket_var
 
 @pytest.yield_fixture
 def setup_server():
