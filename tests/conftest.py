@@ -8,7 +8,7 @@ TCP_IP = '127.0.0.1'
 TCP_PORT = 5005
 BUFFER_SIZE = 20  # Normally 1024, but we want fast response
 
-timeout = 10.  # seconds
+timeout = 10.  # Seconds
 frames_per_second = 50
 
 
