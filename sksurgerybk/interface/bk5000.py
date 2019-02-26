@@ -34,6 +34,7 @@ class BKMedicalDataSourceWorker():
         frames_per_second(positive integer): the expected fps from the \
                                              BK scanner
         """
+        self.data = empty
         self.timeout = timeout
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -102,7 +103,8 @@ class BKMedicalDataSourceWorker():
     def receive_image(self, image):
         """Method docstring"""
 
-    def find_first_a_not_preceded_by_b(self, start_position, buf, char_a, char_b):
+    def find_first_a_not_preceded_by_b(self, start_position, buf,
+                                       char_a, char_b):
         """Method docstring"""
 
 
