@@ -30,7 +30,7 @@ class BKMedicalDataSourceWorker():
         Sets a number of class members.
 
         Parameters:
-        timeout(positive float): the timeout in seconds.
+        timeout(positive float): the connection timeout in seconds.
         frames_per_second(positive integer): the expected fps from the \
                                              BK scanner
         """
