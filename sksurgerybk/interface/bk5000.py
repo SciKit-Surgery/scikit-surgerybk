@@ -39,6 +39,8 @@ class BKMedicalDataSourceWorker():
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(self.timeout)
+        self.request_stop_streaming = False
+        self.is_streaming = False
 
     def request_stop(self):
         """Method docstring"""
@@ -52,7 +54,14 @@ class BKMedicalDataSourceWorker():
             self.socket.close()
 
     def stop_streaming(self):
-        """Method docstring"""
+        """ Send a message to stop the streaming of messages """
+        stop_message = b'QUERY:GRAB_FRAME \"OFF\",{:};'.format(
+                                                        self.frames_per_second)
+        sentOK = self.send_command_message(stop_message)
+        if not sentOK:
+            print("Failed to send stop message: {:}.".format(stop_message))
+        self.is_streaming = False
+        self.request_stop_streaming = False
 
     def start_streaming(self):
         """Method docstring"""
