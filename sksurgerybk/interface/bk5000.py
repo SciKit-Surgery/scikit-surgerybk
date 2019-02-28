@@ -97,15 +97,23 @@ class BKMedicalDataSourceWorker():
         Parameters:
         message(bytes string in Python3): the message to be sent
         """
-        bytes_sent = self.socket.send(message)
-        # Check the sent went OK.
-        if bytes_sent != len(message):
-            print("Failed to send message: {:} due to size mismatch: {:} \
-            different from {:} bytes sent.".format(message,
-                                                   len(message),
-                                                   bytes_sent))
+        try:
+            bytes_sent = self.socket.send(message)
+            isOK = True
+            # Check the sent went OK.
+            if bytes_sent != len(message):
+                print("Failed to send message: {:} due to size mismatch: {:} \
+                different from {:} bytes sent.".format(message,
+                                                       len(message),
+                                                       bytes_sent))
+                isOK = False
+            return isOK
+        except socket.error as error_msg:
+            print("An error: {:} has occured while trying to send \
+            the message: {:}.".format(error_msg, message))
 
-    def receive_response_message(self, expected_size):
+
+    def receive_response_message(self, expected_size=BUFFER_SIZE):
         """Receive a message
 
         Stores it under the data class member
