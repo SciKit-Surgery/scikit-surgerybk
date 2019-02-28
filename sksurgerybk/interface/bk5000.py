@@ -122,11 +122,14 @@ class BKMedicalDataSourceWorker():
         expected_size(int): the receive message size in bytes
         """
         self.data = self.socket.recv(expected_size)
-        if len(self.data) != expected_size:
+        isOK = True
+        if len(self.data) > expected_size:
             print("Failed to receive message: {:} due to size mismatch: {:} \
             different from {:} bytes received.".format(self.data,
                                                        len(self.data),
                                                        expected_size))
+            isOK = False
+        return isOK
 
     def receive_image(self, image):
         """Method docstring"""
