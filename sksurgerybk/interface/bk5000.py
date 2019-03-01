@@ -54,12 +54,16 @@ class BKMedicalDataSourceWorker():
             self.socket.close()
 
     def stop_streaming(self):
-        """ Send a message to stop the streaming of messages """
+        """ Send a message to stop the streaming """
         stop_message = b'QUERY:GRAB_FRAME \"OFF\",{:};'.\
         format(self.frames_per_second)
         sent_ok = self.send_command_message(stop_message)
         if not sent_ok:
             print("Failed to send stop message: {:}.".format(stop_message))
+        recv_ok = self.receive_response_message()
+        if not recv_ok:
+            print("Failed to receive acknowledgment for stop message: {:}.".\
+            format(stop_message))
         self.is_streaming = False
         self.request_stop_streaming = False
 
