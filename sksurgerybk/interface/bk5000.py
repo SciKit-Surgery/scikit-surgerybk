@@ -68,7 +68,17 @@ class BKMedicalDataSourceWorker():
         self.request_stop_streaming = False
 
     def start_streaming(self):
-        """Method docstring"""
+        """ Send a message to start the streaming """
+        start_message = b'QUERY:GRAB_FRAME \"ON\",{:};'.\
+        format(self.frames_per_second)
+        sent_ok = self.send_command_message(start_message)
+        if not sent_ok:
+            print("Failed to send stop message: {:}.".format(start_message))
+        recv_ok = self.receive_response_message()
+        if not recv_ok:
+            print("Failed to receive acknowledgment for start message: {:}.".\
+            format(start_message))
+        self.is_streaming = True
 
     def connect_to_host(self, address, port):
         """ Connects the client to the host/serverself.
