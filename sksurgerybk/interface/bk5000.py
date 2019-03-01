@@ -43,7 +43,8 @@ class BKMedicalDataSourceWorker():
         self.is_streaming = False
 
     def request_stop(self):
-        """Method docstring"""
+        """Set the appropriate class member"""
+        self.request_stop_streaming = True
 
     def disconnect_from_host(self):
         """ Disconnects the client from the host.
