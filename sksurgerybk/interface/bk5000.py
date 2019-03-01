@@ -55,10 +55,10 @@ class BKMedicalDataSourceWorker():
 
     def stop_streaming(self):
         """ Send a message to stop the streaming of messages """
-        stop_message = b'QUERY:GRAB_FRAME \"OFF\",{:};'.format(
-                                                        self.frames_per_second)
-        sentOK = self.send_command_message(stop_message)
-        if not sentOK:
+        stop_message = b'QUERY:GRAB_FRAME \"OFF\",{:};'.\
+        format(self.frames_per_second)
+        sent_ok = self.send_command_message(stop_message)
+        if not sent_ok:
             print("Failed to send stop message: {:}.".format(stop_message))
         self.is_streaming = False
         self.request_stop_streaming = False
@@ -99,15 +99,15 @@ class BKMedicalDataSourceWorker():
         """
         try:
             bytes_sent = self.socket.send(message)
-            isOK = True
+            is_ok = True
             # Check the sent went OK.
             if bytes_sent != len(message):
                 print("Failed to send message: {:} due to size mismatch: {:} \
                 different from {:} bytes sent.".format(message,
                                                        len(message),
                                                        bytes_sent))
-                isOK = False
-            return isOK
+                is_ok = False
+            return is_ok
         except socket.error as error_msg:
             print("An error: {:} has occured while trying to send \
             the message: {:}.".format(error_msg, message))
@@ -122,14 +122,14 @@ class BKMedicalDataSourceWorker():
         expected_size(int): the receive message size in bytes
         """
         self.data = self.socket.recv(expected_size)
-        isOK = True
+        is_ok = True
         if len(self.data) > expected_size:
             print("Failed to receive message: {:} due to size mismatch: {:} \
             different from {:} bytes received.".format(self.data,
                                                        len(self.data),
                                                        expected_size))
-            isOK = False
-        return isOK
+            is_ok = False
+        return is_ok
 
     def receive_image(self, image):
         """Method docstring"""
