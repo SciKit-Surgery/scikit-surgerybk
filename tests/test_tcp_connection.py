@@ -20,7 +20,14 @@ def test_stop_streaming(setup_server, bk_medical_data_source_worker, socket_var)
     bk_medical_data_source_worker.stop_streaming()
     assert bk_medical_data_source_worker.is_streaming == False
     assert bk_medical_data_source_worker.request_stop_streaming == False
+    print("Received data in test: {:} \n".format(
+             bk_medical_data_source_worker.data))
 
-    bk_medical_data_source_worker.receive_response_message()
+def test_start_streaming(setup_server, bk_medical_data_source_worker, socket_var):
+    bk_medical_data_source_worker.connect_to_host(address=socket_var["TCP_IP"],
+                                                  port=socket_var["TCP_PORT"])
+    bk_medical_data_source_worker.start_streaming()
+    assert bk_medical_data_source_worker.is_streaming == True
+    assert bk_medical_data_source_worker.request_stop_streaming == False
     print("Received data in test: {:} \n".format(
              bk_medical_data_source_worker.data))
