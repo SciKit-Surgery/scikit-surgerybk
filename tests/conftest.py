@@ -59,8 +59,8 @@ def setup_server():
 
 
 @pytest.fixture
-def bk_medical_data_source_worker():
-    """Instantiate the BKMedicalDataSourceWorker"""
-    from sksurgerybk.interface.bk5000 import BKMedicalDataSourceWorker
-    return BKMedicalDataSourceWorker(timeout=timeout,
+def bk_5000():
+    """Instantiate the BK5000"""
+    from sksurgerybk.interface.bk5000 import BK5000
+    return BK5000(timeout=timeout,
                                      frames_per_second=frames_per_second)

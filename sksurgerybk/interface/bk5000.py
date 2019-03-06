@@ -10,18 +10,7 @@ TCP_PORT = 5005
 BUFFER_SIZE = 1024
 MESSAGE = "Hello, world"
 
-
-class BKMedicalDataSourceActivator():
-    """A class"""
-
-    def __init__(self):
-        """The constructor"""
-
-    def load(self, context):
-        """Load method"""
-
-
-class BKMedicalDataSourceWorker():
+class BK5000():
     """This class sets the TCP connection with the BK scanner"""
 
     def __init__(self, timeout, frames_per_second):
