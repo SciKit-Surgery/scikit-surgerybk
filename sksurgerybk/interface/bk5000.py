@@ -65,14 +65,15 @@ class BK5000():
             is_ok = True
             # Check the sent went OK.
             if bytes_sent != len(message_to_send):
-                print("Failed to send message: {:} due to size mismatch: {:} \
+                is_ok = False
+                raise IOError(
+                    "Failed to send message: {:} due to size mismatch: {:} \
                 different from {:} bytes sent.".format(message_to_send,
                                                        len(message_to_send),
                                                        bytes_sent))
-                is_ok = False
             return is_ok
         except socket.error as error_msg:
-            print("An error: {:} has occured while trying to send \
+            raise IOError("An error: {:} has occured while trying to send \
             the message: {:}.".format(error_msg, message))
 
     def receive_response_message(self, expected_size=BUFFER_SIZE):
@@ -88,11 +89,12 @@ class BK5000():
         self.data = data_with_terminators[1:-1]
         is_ok = True
         if len(self.data) > expected_size:
-            print("Failed to receive message: {:} due to size mismatch: {:} \
+            is_ok = False
+            raise IOError(
+                "Failed to receive message: {:} due to size mismatch: {:} \
             different from {:} bytes received.".format(self.data,
                                                        len(self.data),
                                                        expected_size))
-            is_ok = False
         return is_ok
     def request_stop(self):
         """Set the appropriate class member"""
@@ -112,10 +114,12 @@ class BK5000():
         format(self.frames_per_second)
         sent_ok = self.send_command_message(stop_message)
         if not sent_ok:
-            print("Failed to send stop message: {:}.".format(stop_message))
+            raise IOError(
+                "Failed to send stop message: {:}.".format(stop_message))
         recv_ok = self.receive_response_message()
         if not recv_ok:
-            print("Failed to receive acknowledgment for stop message: {:}.".\
+            raise IOError(
+                "Failed to receive acknowledgment for stop message: {:}.".\
             format(stop_message))
         self.is_streaming = False
         self.request_stop_streaming = False
@@ -126,10 +130,12 @@ class BK5000():
         format(self.frames_per_second)
         sent_ok = self.send_command_message(start_message)
         if not sent_ok:
-            print("Failed to send stop message: {:}.".format(start_message))
+            raise IOError(
+                "Failed to send stop message: {:}.".format(start_message))
         recv_ok = self.receive_response_message()
         if not recv_ok:
-            print("Failed to receive acknowledgment for start message: {:}.".\
+            raise IOError(
+                "Failed to receive acknowledgment for start message: {:}.".\
             format(start_message))
         self.is_streaming = True
 
@@ -145,9 +151,10 @@ class BK5000():
         try:
             self.socket.connect((address, port))
         except socket.error as error_msg:
-            print("An error: {:} has occured while trying to connect to: {:} \
-            with port: {:}".format(error_msg, address, port))
             self.socket.close()
+            raise IOError(
+                "An error: {:} has occured while trying to connect to: {:} \
+            with port: {:}".format(error_msg, address, port))
 
     def query_win_size(self):
         """ Query the BK5000 for the window/image size """
@@ -158,9 +165,10 @@ class BK5000():
             if response:
                 self.parse_win_size_message(self.data.decode())
             else:
-                print("An error occurred getting the WIN_SIZE response")
+                raise IOError(
+                    "An error occurred getting the WIN_SIZE response")
         else:
-            print("An error occured when querying window size")
+            raise IOError("An error occured when querying window size")
         return is_ok
 
     def parse_win_size_message(self, message):

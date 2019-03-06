@@ -19,8 +19,9 @@ def test_send_command_message(mocked_send, bk_5000):
     mocked_send.assert_called_with(expected.encode())
 
     msg_wrong_size = "short_msg"
-    is_ok = bk_5000.send_command_message(msg_wrong_size)
-    assert is_ok == False
+    with pytest.raises(IOError):
+        is_ok = bk_5000.send_command_message(msg_wrong_size)
+        assert is_ok == False
 
 def test_request_stop(bk_5000):
     bk_5000.request_stop()
@@ -31,8 +32,9 @@ def test_receive_response_message(mocked_recv, bk_5000):
     bk_5000.receive_response_message()
     assert bk_5000.data == b'test'
 
-    is_ok = bk_5000.receive_response_message(expected_size=0)
-    assert is_ok == False
+    with pytest.raises(IOError):
+        is_ok = bk_5000.receive_response_message(expected_size=0)
+        assert is_ok == False
     
 @mock.patch('socket.socket.recv', return_value = False)
 @mock.patch('socket.socket.close')
@@ -51,7 +53,7 @@ def test_stop_streaming(mocked_send, mocked_recv, bk_5000):
     assert bk_5000.is_streaming == False
     assert bk_5000.request_stop_streaming == False
 
-@mock.patch('socket.socket.send', return_value=29)
+@mock.patch('socket.socket.send', return_value=27)
 @mock.patch('socket.socket.recv', return_value='ACK')
 def test_start_streaming(mocked_send, mocked_recv, bk_5000):
     bk_5000.start_streaming()
