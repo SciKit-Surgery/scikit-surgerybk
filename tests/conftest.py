@@ -49,7 +49,7 @@ def socket_var():
     socket_var = {"TCP_IP": TCP_IP, "TCP_PORT": TCP_PORT}
     return socket_var
 
-@pytest.yield_fixture
+@pytest.fixture
 def setup_server():
     """Setting up the server in a thread"""
     print("Setting up the server \n")
@@ -65,5 +65,4 @@ def setup_server():
 def bk_5000():
     """Instantiate the BK5000"""
     from sksurgerybk.interface.bk5000 import BK5000
-    return BK5000(timeout=timeout,
-                                     frames_per_second=frames_per_second)
+    return BK5000(timeout=timeout, frames_per_second=frames_per_second)
