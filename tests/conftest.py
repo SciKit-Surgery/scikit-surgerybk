@@ -31,7 +31,10 @@ class TestingServer():
                 if not data:
                     break
                 print("Received data in server: {:} \n".format(data))
-                conn.send(data)  # echo
+                if data == b"\x01QUERY:US_WIN_SIZE;\x04":
+                    conn.send(b"\x01DATA: US_WIN_SIZE 640,480;\x04")
+                else:
+                    conn.send(data)  # echo
             except Exception:
                 self.done = True
 

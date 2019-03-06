@@ -9,11 +9,11 @@ def test_TestServer(setup_server, bk_5000, socket_var):
 
     assert sentOK == True
     receiveOK = bk_5000.receive_response_message(
-                                  expected_size=len(sent_message))
+                                  expected_size=len(test_message))
     assert receiveOK == True
     print("Received data in test: {:} \n".format(
              bk_5000.data))
-    assert bk_5000.data.decode() == sent_message
+    assert bk_5000.data.decode() == test_message
 
 def test_stop_streaming(setup_server, bk_5000, socket_var):
     bk_5000.connect_to_host(address=socket_var["TCP_IP"],
@@ -38,3 +38,9 @@ def test_request_stop(setup_server, bk_5000, socket_var):
                                                   port=socket_var["TCP_PORT"])
     bk_5000.request_stop()
     assert bk_5000.request_stop_streaming == True
+
+def test_query_win_size(setup_server, bk_5000, socket_var):
+    bk_5000.connect_to_host(address=socket_var["TCP_IP"],
+                                                  port=socket_var["TCP_PORT"])
+    bk_5000.query_win_size()
+    assert bk_5000.image_size == [640, 480]

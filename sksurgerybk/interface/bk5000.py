@@ -86,12 +86,32 @@ class BK5000():
             with port: {:}".format(error_msg, address, port))
             self.socket.close()
 
+    def query_win_size(self):
         query_win_size_message = "QUERY:US_WIN_SIZE;"
+        is_ok = self.send_command_message(query_win_size_message)
+        if is_ok:
+            response = self.receive_response_message(expected_size = 25)
+            self.parse_win_size_message(self.data.decode())
+
     def parse_win_size_message(self, message):
-        """Method docstring"""
+        """Extrack the size of the US window from the response message
+
+        Message has format "DATA: US_WIN_SIZE 124,455;"
+
+        Parameters:
+        message(string): the received message """
+
+        # Split on spaces, get the final token, strip the ; and split into
+        # the two integers.
+        print("parse {}".format(message))
+        dim_part_of_message = message.split()[-1].strip(';').split(',')
+        self.image_size = [int(s) for s in dim_part_of_message]
 
     def generate_command_message(self, message):
-        """ Append 0x01 and 0x04 to start/end of message before sending """
+        """ Append 0x01 and 0x04 to start/end of message before sending
+        
+        Parameters:
+        message(string): the message to be sent"""
         char_start = bytearray.fromhex("01").decode()
         char_end  = bytearray.fromhex("04").decode()
 
@@ -137,7 +157,9 @@ class BK5000():
         Parameters:
         expected_size(int): the receive message size in bytes
         """
-        self.data = self.socket.recv(expected_size)
+        actual_size = expected_size + 2 # Due to start/end terminator
+        data_with_terminators = self.socket.recv(actual_size)
+        self.data = data_with_terminators[1:-1]
         is_ok = True
         if len(self.data) > expected_size:
             print("Failed to receive message: {:} due to size mismatch: {:} \
