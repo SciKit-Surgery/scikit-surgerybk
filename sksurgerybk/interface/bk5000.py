@@ -56,7 +56,7 @@ class BKMedicalDataSourceWorker():
 
     def stop_streaming(self):
         """ Send a message to stop the streaming """
-        stop_message = b'QUERY:GRAB_FRAME \"OFF\",{:};'.\
+        stop_message = 'QUERY:GRAB_FRAME \"OFF\",{:};'.\
         format(self.frames_per_second)
         sent_ok = self.send_command_message(stop_message)
         if not sent_ok:
@@ -70,7 +70,7 @@ class BKMedicalDataSourceWorker():
 
     def start_streaming(self):
         """ Send a message to start the streaming """
-        start_message = b'QUERY:GRAB_FRAME \"ON\",{:};'.\
+        start_message = 'QUERY:GRAB_FRAME \"ON\",{:};'.\
         format(self.frames_per_second)
         sent_ok = self.send_command_message(start_message)
         if not sent_ok:
@@ -97,11 +97,21 @@ class BKMedicalDataSourceWorker():
             with port: {:}".format(error_msg, address, port))
             self.socket.close()
 
+        query_win_size_message = "QUERY:US_WIN_SIZE;"
     def parse_win_size_message(self, message):
         """Method docstring"""
 
     def generate_command_message(self, message):
-        """Method docstring"""
+        """ Append 0x01 and 0x04 to start/end of message before sending """
+        char_start = bytearray.fromhex("01").decode()
+        char_end  = bytearray.fromhex("04").decode()
+
+        message_to_send = char_start + message + char_end
+
+        message_length = len(message_to_send)
+        logging.debug("Message to send: {}  Size: {}".format(message_to_send, message_length))
+
+        return message_to_send
 
     def send_command_message(self, message):
         """Send a message through the socket.
@@ -110,16 +120,18 @@ class BKMedicalDataSourceWorker():
         message has been sent correctly.
 
         Parameters:
-        message(bytes string in Python3): the message to be sent
+        message(string): the message to be sent
         """
+
+        message_to_send = self.generate_command_message(message)
         try:
-            bytes_sent = self.socket.send(message)
+            bytes_sent = self.socket.send(message_to_send.encode())
             is_ok = True
             # Check the sent went OK.
-            if bytes_sent != len(message):
+            if bytes_sent != len(message_to_send):
                 print("Failed to send message: {:} due to size mismatch: {:} \
-                different from {:} bytes sent.".format(message,
-                                                       len(message),
+                different from {:} bytes sent.".format(message_to_send,
+                                                       len(message_to_send),
                                                        bytes_sent))
                 is_ok = False
             return is_ok
