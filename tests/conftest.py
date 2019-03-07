@@ -6,9 +6,9 @@ from threading import Thread
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 5005
-BUFFER_SIZE = 20  # Normally 1024, but we want fast response
+BUFFER_SIZE = 1024
 
-timeout = 10.  # seconds
+timeout = 10.  # Seconds
 frames_per_second = 50
 
 
@@ -31,7 +31,10 @@ class TestingServer():
                 if not data:
                     break
                 print("Received data in server: {:} \n".format(data))
-                conn.send(data)  # echo
+                if data == b"\x01QUERY:US_WIN_SIZE;\x04":
+                    conn.send(b"\x01DATA: US_WIN_SIZE 640,480;\x04")
+                else:
+                    conn.send(data)  # echo
             except Exception:
                 self.done = True
 
@@ -43,13 +46,10 @@ class TestingServer():
 @pytest.fixture
 def socket_var():
     """A bunch of socket related variables"""
-    pytest.TCP_IP = TCP_IP
-    pytest.TCP_PORT = TCP_PORT
-    pytest.BUFFER_SIZE = BUFFER_SIZE
-    return pytest
+    socket_var = {"TCP_IP": TCP_IP, "TCP_PORT": TCP_PORT}
+    return socket_var
 
-
-@pytest.yield_fixture
+@pytest.fixture
 def setup_server():
     """Setting up the server in a thread"""
     print("Setting up the server \n")
@@ -58,11 +58,11 @@ def setup_server():
     thread.start()
     yield thread
     test_server.close()
+    print("The server is now closed.")
 
 
 @pytest.fixture
-def bk_medical_data_source_worker():
-    """Instantiate the BKMedicalDataSourceWorker"""
-    from sksurgerybk.interface.bk5000 import BKMedicalDataSourceWorker
-    return BKMedicalDataSourceWorker(timeout=timeout,
-                                     frames_per_second=frames_per_second)
+def bk_5000():
+    """Instantiate the BK5000"""
+    from sksurgerybk.interface.bk5000 import BK5000
+    return BK5000(timeout=timeout, frames_per_second=frames_per_second)
