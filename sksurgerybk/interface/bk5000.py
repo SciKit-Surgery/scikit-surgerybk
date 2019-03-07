@@ -2,13 +2,9 @@
 
 import socket
 import logging
+import numpy as np
 
 LOGGER = logging.getLogger(__name__)
-
-TCP_IP = '127.0.0.1'
-TCP_PORT = 5005
-BUFFER_SIZE = 1024
-MESSAGE = "Hello, world"
 
 class BK5000():
     """This class sets the TCP connection with the BK scanner"""
@@ -28,9 +24,24 @@ class BK5000():
         self.frames_per_second = frames_per_second
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(self.timeout)
+        self.minimum_size = None
+        self.packet_size = 1024
         self.request_stop_streaming = False
         self.is_streaming = False
         self.image_size = [0, 0]
+        self.buffer = bytearray()
+        self.np_buffer = None
+        self.result = None
+        self.valid = False
+
+        self.control_bits = [1, 4, 27]
+        self.flipped_control_bits = [bit ^ 0xFF for bit in self.control_bits]
+
+    def __del__(self):
+        """ Close the socket on object deletion/app exit. """
+        logging.debug("Deleting object, closing socket")
+        self.socket.close()
+
 
     def generate_command_message(self, message):
         #pylint:disable=no-self-use
@@ -76,7 +87,7 @@ class BK5000():
             raise IOError("An error: {:} has occured while trying to send \
             the message: {:}.".format(error_msg, message))
 
-    def receive_response_message(self, expected_size=BUFFER_SIZE):
+    def receive_response_message(self, expected_size=1024):
         """Receive a message
 
         Stores it under the data class member
@@ -105,7 +116,7 @@ class BK5000():
 
         Check a receive, if not empty, disconnect
         """
-        if not self.socket.recv(BUFFER_SIZE):
+        if not self.socket.recv(self.packet_size):
             self.socket.close()
 
     def stop_streaming(self):
@@ -161,7 +172,7 @@ class BK5000():
         query_win_size_message = "QUERY:US_WIN_SIZE;"
         is_ok = self.send_command_message(query_win_size_message)
         if is_ok:
-            response = self.receive_response_message(expected_size=27)
+            response = self.receive_response_message(expected_size=25)
             if response:
                 self.parse_win_size_message(self.data.decode())
             else:
@@ -181,13 +192,196 @@ class BK5000():
 
         # Split on spaces, get the final token, strip the ; and split into
         # the two integers.
-        print("parse {}".format(message))
+        logging.info("Parsing window size message %s", message)
         dim_part_of_message = message.split()[-1].strip(';').split(',')
         self.image_size = [int(s) for s in dim_part_of_message]
+        logging.info("Window size: %s", self.image_size)
 
-    def receive_image(self, image):
-        """Method docstring"""
+    def find_first_a_not_preceded_by_b(self, start_pos, a, b):
+        #pylint:disable=invalid-name
+        """
+        Find the first instance of 'a' in an array that isn't preceded by 'b'
 
-    def find_first_a_not_preceded_by_b(self, start_position, buf,
-                                       char_a, char_b):
-        """Method docstring"""
+        :param start_pos: Index in array to begin search at
+        :type start_pos: integer
+        :param a: Value to find
+        :type a: integer
+        :param b: Value not to precede a
+        :type b: integer
+        :return: Index of first a not preceded by b, -1 if none found
+        :rtype: integer
+        """
+
+        found = -1
+
+        trimmed_buffer = self.np_buffer[start_pos:]
+        if trimmed_buffer[0] == a:
+            found = 0
+
+        else:
+            a_idx = np.where(trimmed_buffer == a)[0]
+            not_b_idx = np.where(trimmed_buffer[a_idx - 1] != b)[0]
+
+            if len(not_b_idx):
+                first_a_not_preceded_by_b_idx = a_idx[not_b_idx]
+                found = start_pos + first_a_not_preceded_by_b_idx[0]
+
+        return found
+
+    def clear_bytes_in_buffer(self, start, end):
+        """
+        Clear a set of bytes in bytearray buffer
+
+        :param start: Start index
+        :type start: integer
+        :param end: End integer
+        :type end: integer
+        """
+
+        logging.debug("Start: %i End: %i", start, end)
+
+        # Can't delete past the end of the buffer
+        if end >= len(self.buffer):
+            end = len(self.buffer)
+
+        del self.buffer[start:end]
+
+    def decode_image(self):
+        """
+        Process the stream of data received from the BK5000 and convert
+        it into a numpy array which represents the ultrasound image.
+
+        Control characters are removed, and any values that come immediately
+        after a control character are bit flipped.
+
+        """
+
+        uc27_idx = np.where(self.np_buffer == self.control_bits[2])[0]
+
+        idx_to_del = np.array([], dtype=np.uint8)
+        for bit in self.flipped_control_bits:
+            idx = np.where(self.np_buffer[uc27_idx + 1] == bit)[0]
+            idx_to_del = np.append(idx_to_del, uc27_idx[idx])
+
+        # a = uc27_idx[ucN1_idx]
+        # b = uc27_idx[ucN4_idx]
+        # c = uc27_idx[ucN27_idx]
+
+        # x = np.union1d(a, b)
+        # idx_to_del = np.union1d(x, c)
+
+        self.np_buffer[idx_to_del + 1] ^= 0xFF
+
+        result = np.delete(self.np_buffer, idx_to_del)
+
+        return result
+
+    def receive_image(self):
+        """
+        Scan the incoming data stream to find the start and end
+        of the image data.
+        """
+
+        # self.buffer contains the received TCP data
+        # We also want a numpy representation of this.
+        # Some operations are simpler to do on a bytearray than np array
+        self.np_buffer = np.frombuffer(self.buffer, dtype=np.uint8)
+
+        valid = False
+        preceding_char_idx = self.find_first_a_not_preceded_by_b(0, 0x01, 0x27)
+
+        if preceding_char_idx < 0:
+            logging.warning("Failed to find start of message character. \
+                This suggetss there is junk in the buffer")
+            self.buffer.clear()
+            return valid, None
+
+        terminating_char_idx = self.find_first_a_not_preceded_by_b(
+            preceding_char_idx, 0x04, 0x27)
+
+        if terminating_char_idx <= preceding_char_idx:
+            logging.debug("Failed to find end of message character. \
+                This is OK if message is still incoming.")
+            return valid, None
+
+        # There isn't a standard way to do the buffer.find operation on a
+        # numpy array e.g. find a sequence of values,
+        # so we use the bytearray function instead.
+
+        # utf-8 to be compatible with buffer
+        img_msg = "DATA:GRAB_FRAME".encode('utf-8')
+        img_msg_index = self.buffer.find(img_msg, preceding_char_idx)
+
+        if not (img_msg_index != -1 and # i.e. it was found
+                preceding_char_idx < img_msg_index < terminating_char_idx):
+
+            logging.warning("Received a non-image message, \
+                    which I wasn't expecting.")
+
+            self.clear_bytes_in_buffer(0, terminating_char_idx + 1)
+            return valid, None
+
+        logging.debug("Starting decode step.")
+        hash_char = self.buffer.find('#'.encode('utf-8'), preceding_char_idx)
+        size_of_data_char = hash_char + 1
+
+        start_image_char = size_of_data_char + \
+                           1 + 4 + \
+                           self.buffer[size_of_data_char] - ord('0') # ASCII
+
+        end_image_char = terminating_char_idx - 2
+        data_size = terminating_char_idx - preceding_char_idx + 1
+        image_size = end_image_char - start_image_char + 1
+
+        self.np_buffer = self.np_buffer[start_image_char:end_image_char + 1]
+        result = self.decode_image()
+
+        logging.debug("Image received")
+        self.clear_bytes_in_buffer(0, terminating_char_idx + 1)
+
+        valid = True
+        return valid, result
+
+    def get_frame(self):
+        """
+        Get the next frame from the BK5000.
+        """
+        self.minimum_size = self.image_size[0] * self.image_size[1] + 22
+
+        while len(self.buffer) < self.minimum_size:
+            self.buffer.extend(self.socket.recv(self.minimum_size))
+
+
+        valid, result = self.receive_image()
+        if valid:
+            #TODO: Optimise this step
+
+            self.result = result[:self.image_size[0] * self.image_size[1]].reshape(img_y, img_x).T
+            self.valid = True
+
+        else:
+            self.buffer.extend(self.socket.recv(self.packet_size))
+            self.valid = None
+
+if __name__ == "__main__":
+
+    import cv2
+    logging.basicConfig(level=logging.INFO)
+
+    TCP_IP = '128.16.0.3' # Default IP of BK5000
+    TCP_PORT = 7915       # Default port of BK5000   
+    TIMEOUT = 5
+    FPS = 25
+
+    bk = BK5000(TIMEOUT, FPS)
+    bk.connect_to_host(TCP_IP, TCP_PORT)
+    bk.query_win_size()
+    bk.start_streaming()
+
+    while True:
+        bk.get_frame()
+        img_x, img_y = bk.image_size
+        if bk.valid:
+            cv2.imshow('a', bk.result)
+            cv2.waitKey(1)
+
