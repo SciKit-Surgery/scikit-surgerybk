@@ -1,5 +1,6 @@
 import pytest
 import pickle
+import sys
 import numpy as np
 
 """ Test image acqusition/decoding from BK5000 """
@@ -68,7 +69,13 @@ def test_receive_image(bk_5000):
     Test that image decoding is working as expected.
     buffer test data is real data acquired from BK5000, and
     the expected image is also a real image.
+
     """
+    # Python 2.x can't by default read data that has been
+    # pickled in Python 3, so don't run this test in Python 2
+    if sys.version_info.major == 2:
+        return
+    
     buffer_file = 'tests/data/bk_image_data/bk_buffer.pickle'
     image_file = 'tests/data/bk_image_data/image.pickle'
 
