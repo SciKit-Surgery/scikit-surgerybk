@@ -253,14 +253,19 @@ class BK5000():
         Process the stream of data received from the BK5000 and convert
         it into a numpy array which represents the ultrasound image.
 
-        Control characters are removed, and any values that come immediately
-        after a control character are bit flipped.
-
+        Control bytes are 1, 4 and 27. Flipped control bytes (1s complement
+        of control bytes) are 254, 251, 228.
+        Any time a flipped control bytes occurs after a 27,
+        the value should be flipped and the preceding 27 deleted.
+        See page 9 of 142 in BK doc PS12640-44 for further details.
         """
 
+        # Find all locations of '27'
         uc27_idx = np.where(self.np_buffer == self.control_bits[2])[0]
 
         idx_to_del = np.array([], dtype=np.uint8)
+
+        # Find each time a flipped_control_bit comes after a '27'
         for bit in self.flipped_control_bits:
             idx = np.where(self.np_buffer[uc27_idx + 1] == bit)[0]
             idx_to_del = np.append(idx_to_del, uc27_idx[idx])
@@ -357,7 +362,7 @@ class BK5000():
             self.valid = None
 
 if __name__ == "__main__":
-    #pylint:disable=no-member, invalid-name
+    #pylint:disable=no-member, invalid-name, import-error
     import cv2
     logging.basicConfig(level=logging.INFO)
 
