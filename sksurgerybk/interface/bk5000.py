@@ -7,6 +7,8 @@ import numpy as np
 LOGGER = logging.getLogger(__name__)
 
 class BK5000():
+#pylint:disable=too-many-instance-attributes
+
     """This class sets the TCP connection with the BK scanner"""
 
     def __init__(self, timeout, frames_per_second):
@@ -85,7 +87,7 @@ class BK5000():
             return is_ok
         except socket.error as error_msg:
             raise IOError("An error: {:} has occured while trying to send \
-            the message: {:}.".format(error_msg, message))
+            the message: {:}.".format(error_msg, message_to_send))
 
     def receive_response_message(self, expected_size=1024):
         """Receive a message
@@ -222,7 +224,7 @@ class BK5000():
             a_idx = np.where(trimmed_buffer == a)[0]
             not_b_idx = np.where(trimmed_buffer[a_idx - 1] != b)[0]
 
-            if len(not_b_idx):
+            if not_b_idx.size > 0:
                 first_a_not_preceded_by_b_idx = a_idx[not_b_idx]
                 found = start_pos + first_a_not_preceded_by_b_idx[0]
 
@@ -262,13 +264,6 @@ class BK5000():
         for bit in self.flipped_control_bits:
             idx = np.where(self.np_buffer[uc27_idx + 1] == bit)[0]
             idx_to_del = np.append(idx_to_del, uc27_idx[idx])
-
-        # a = uc27_idx[ucN1_idx]
-        # b = uc27_idx[ucN4_idx]
-        # c = uc27_idx[ucN27_idx]
-
-        # x = np.union1d(a, b)
-        # idx_to_del = np.union1d(x, c)
 
         self.np_buffer[idx_to_del + 1] ^= 0xFF
 
@@ -330,8 +325,6 @@ class BK5000():
                            self.buffer[size_of_data_char] - ord('0') # ASCII
 
         end_image_char = terminating_char_idx - 2
-        data_size = terminating_char_idx - preceding_char_idx + 1
-        image_size = end_image_char - start_image_char + 1
 
         self.np_buffer = self.np_buffer[start_image_char:end_image_char + 1]
         result = self.decode_image()
@@ -354,9 +347,9 @@ class BK5000():
 
         valid, result = self.receive_image()
         if valid:
-            #TODO: Optimise this step
 
-            self.result = result[:self.image_size[0] * self.image_size[1]].reshape(img_y, img_x).T
+            self.result = result[:self.image_size[0] * self.image_size[1]] \
+                          .reshape(self.image_size[1], self.image_size[0]).T
             self.valid = True
 
         else:
@@ -364,12 +357,12 @@ class BK5000():
             self.valid = None
 
 if __name__ == "__main__":
-
+    #pylint:disable=no-member, invalid-name
     import cv2
     logging.basicConfig(level=logging.INFO)
 
     TCP_IP = '128.16.0.3' # Default IP of BK5000
-    TCP_PORT = 7915       # Default port of BK5000   
+    TCP_PORT = 7915       # Default port of BK5000
     TIMEOUT = 5
     FPS = 25
 
@@ -380,8 +373,6 @@ if __name__ == "__main__":
 
     while True:
         bk.get_frame()
-        img_x, img_y = bk.image_size
         if bk.valid:
             cv2.imshow('a', bk.result)
             cv2.waitKey(1)
-
