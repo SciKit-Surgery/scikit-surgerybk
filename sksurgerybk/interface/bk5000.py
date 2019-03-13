@@ -122,18 +122,15 @@ class BK5000():
             self.socket.close()
 
     def stop_streaming(self):
-        """ Send a message to stop the streaming """
+        """
+        Send a message to stop the streaming.
+        send_command_message and receive_response_message
+        will throw errors if there is a problem with the socket connection.
+         """
         stop_message = 'QUERY:GRAB_FRAME \"OFF\",{:};'.\
         format(self.frames_per_second)
-        sent_ok = self.send_command_message(stop_message)
-        if not sent_ok:
-            raise IOError(
-                "Failed to send stop message: {:}.".format(stop_message))
-        recv_ok = self.receive_response_message()
-        if not recv_ok:
-            raise IOError(
-                "Failed to receive acknowledgment for stop message: {:}.".\
-            format(stop_message))
+        self.send_command_message(stop_message)
+        self.receive_response_message()
         self.is_streaming = False
         self.request_stop_streaming = False
 
@@ -141,15 +138,8 @@ class BK5000():
         """ Send a message to start the streaming """
         start_message = 'QUERY:GRAB_FRAME \"ON\",{:};'.\
         format(self.frames_per_second)
-        sent_ok = self.send_command_message(start_message)
-        if not sent_ok:
-            raise IOError(
-                "Failed to send stop message: {:}.".format(start_message))
-        recv_ok = self.receive_response_message()
-        if not recv_ok:
-            raise IOError(
-                "Failed to receive acknowledgment for start message: {:}.".\
-            format(start_message))
+        self.send_command_message(start_message)
+        self.receive_response_message()
         self.is_streaming = True
 
     def connect_to_host(self, address, port):
@@ -172,17 +162,10 @@ class BK5000():
     def query_win_size(self):
         """ Query the BK5000 for the window/image size """
         query_win_size_message = "QUERY:US_WIN_SIZE;"
-        is_ok = self.send_command_message(query_win_size_message)
-        if is_ok:
-            response = self.receive_response_message(expected_size=25)
-            if response:
-                self.parse_win_size_message(self.data.decode())
-            else:
-                raise IOError(
-                    "An error occurred getting the WIN_SIZE response")
-        else:
-            raise IOError("An error occured when querying window size")
-        return is_ok
+        self.send_command_message(query_win_size_message)
+        self.receive_response_message(expected_size=25)
+        self.parse_win_size_message(self.data.decode())
+
 
     def parse_win_size_message(self, message):
         """Extrack the size of the US window from the response message
@@ -360,6 +343,7 @@ class BK5000():
         else:
             self.buffer.extend(self.socket.recv(self.packet_size))
             self.valid = None
+
 
 if __name__ == "__main__":
     #pylint:disable=no-member, invalid-name, import-error

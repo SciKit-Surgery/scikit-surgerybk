@@ -11,7 +11,6 @@ def test_connect_to_host(mocked_connect, bk_5000):
     bk_5000.connect_to_host(address, port)
     mocked_connect.assert_called_with((address, port))
 
-
 def test_connect_to_host_raises_error(bk_5000):
     invalid_ip = '1.2.3.4'
     invalid_port = 1234
@@ -19,7 +18,6 @@ def test_connect_to_host_raises_error(bk_5000):
         bk_5000.connect_to_host(invalid_ip, invalid_port)
         
 test_msg = "Hello"
-
 def test_command_message(bk_5000):
     
     expected = "\x01" + test_msg + "\x04"
@@ -48,7 +46,8 @@ def test_request_stop(bk_5000):
     bk_5000.request_stop()
     assert bk_5000.request_stop_streaming == True
 
-@mock.patch('socket.socket.recv', return_value = b'\x01test\x04')
+return_message = b'\x01test\x04'
+@mock.patch('socket.socket.recv', return_value = return_message)
 def test_receive_response_message(mocked_recv, bk_5000):
     bk_5000.receive_response_message()
     assert bk_5000.data == b'test'
@@ -68,7 +67,8 @@ def test_disconnect_from_host(mocked_recv, mocked_close, bk_5000):
     mocked_recv.assert_called()
     mocked_close.assert_called()
 
-@mock.patch('socket.socket.send', return_value=27)
+start_message = b'QUERY:GRAB_FRAME \"ON\",50;'
+@mock.patch('socket.socket.send', return_value=len(start_message) + 2)
 @mock.patch('socket.socket.recv', return_value='ACK')
 def test_start_streaming(mocked_send, mocked_recv, bk_5000):
     bk_5000.start_streaming()
@@ -78,7 +78,8 @@ def test_start_streaming_raises_error(bk_5000):
     with pytest.raises(IOError):
         bk_5000.start_streaming()
 
-@mock.patch('socket.socket.send', return_value=28)
+stop_message = b'QUERY:GRAB_FRAME \"OFF\",50;'
+@mock.patch('socket.socket.send', return_value=len(stop_message) + 2)
 @mock.patch('socket.socket.recv', return_value='ACK')
 def test_stop_streaming(mocked_send, mocked_recv, bk_5000):
     bk_5000.stop_streaming()
@@ -92,7 +93,8 @@ def test_stop_streaming_raises_error(bk_5000):
     with pytest.raises(IOError):
         bk_5000.stop_streaming()
 
-@mock.patch('socket.socket.send', return_value=20)
+query_size_message = b"QUERY:US_WIN_SIZE;"
+@mock.patch('socket.socket.send', return_value=len(query_size_message) + 2)
 @mock.patch('socket.socket.recv', return_value=b'\x01DATA:US_WIN_SIZE 640,480;\x04')
 def test_query_win_size(mocked_send, mocked_recv, bk_5000):
     bk_5000.query_win_size()
