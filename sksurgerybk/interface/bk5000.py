@@ -116,10 +116,16 @@ class BK5000():
     def disconnect_from_host(self):
         """ Disconnects the client from the host.
 
-        Check a receive, if not empty, disconnect
+        If the socket is already closed, a recv() call
+        will throw an error. If it doesn't, we can close the socket.
         """
-        if not self.socket.recv(self.packet_size):
+        logging.info("Attempting to close socket.")
+        try:
+            self.socket.recv(self.packet_size)
             self.socket.close()
+
+        except:
+            logging.info("Socket already closed.")
 
     def stop_streaming(self):
         """
@@ -327,22 +333,28 @@ class BK5000():
         """
         Get the next frame from the BK5000.
         """
-        self.minimum_size = self.image_size[0] * self.image_size[1] + 22
 
-        while len(self.buffer) < self.minimum_size:
-            self.buffer.extend(self.socket.recv(self.minimum_size))
+        while not self.valid:
+            self.minimum_size = self.image_size[0] * self.image_size[1] + 22
+
+            while len(self.buffer) < self.minimum_size:
+                self.buffer.extend(self.socket.recv(self.minimum_size))
 
 
-        valid, result = self.receive_image()
-        if valid:
+            valid, result = self.receive_image()
+            if valid:
 
-            self.result = result[:self.image_size[0] * self.image_size[1]] \
-                          .reshape(self.image_size[1], self.image_size[0]).T
-            self.valid = True
+                self.result = result[:self.image_size[0] * self.image_size[1]] \
+                            .reshape(self.image_size[1], self.image_size[0]).T
+                self.valid = True
 
-        else:
-            self.buffer.extend(self.socket.recv(self.packet_size))
-            self.valid = None
+            else:
+                self.buffer.extend(self.socket.recv(self.packet_size))
+                self.valid = False
+
+        self.valid = False
+            
+        
 
 
 if __name__ == "__main__":
@@ -362,6 +374,5 @@ if __name__ == "__main__":
 
     while True:
         bk.get_frame()
-        if bk.valid:
-            cv2.imshow('a', bk.result)
-            cv2.waitKey(1)
+        cv2.imshow('a', bk.result)
+        cv2.waitKey(1)
