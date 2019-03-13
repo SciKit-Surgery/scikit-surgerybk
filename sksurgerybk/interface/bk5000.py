@@ -119,6 +119,7 @@ class BK5000():
         If the socket is already closed, a recv() call
         will throw an error. If it doesn't, we can close the socket.
         """
+        #pylint:disable=bare-except
         logging.info("Attempting to close socket.")
         try:
             self.socket.recv(self.packet_size)
@@ -353,8 +354,6 @@ class BK5000():
                 self.valid = False
 
         self.valid = False
-            
-        
 
 
 if __name__ == "__main__":
