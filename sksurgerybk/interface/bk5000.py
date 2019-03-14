@@ -282,7 +282,7 @@ class BK5000():
 
         if preceding_char_idx < 0:
             logging.warning("Failed to find start of message character. \
-                This suggetss there is junk in the buffer")
+                This suggets there is junk in the buffer")
             self.buffer.clear()
             return valid, None
 
@@ -334,6 +334,7 @@ class BK5000():
         """
         Get the next frame from the BK5000.
         """
+        self.valid = False
 
         while not self.valid:
             self.minimum_size = self.image_size[0] * self.image_size[1] + 22
@@ -351,9 +352,6 @@ class BK5000():
 
             else:
                 self.buffer.extend(self.socket.recv(self.packet_size))
-                self.valid = False
-
-        self.valid = False
 
 
 if __name__ == "__main__":
