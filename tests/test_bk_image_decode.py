@@ -74,19 +74,21 @@ def test_receive_image(bk_5000):
     # Python 2.x can't by default read data that has been
     # pickled in Python 3, so don't run this test in Python 2
     if sys.version_info.major == 2:
-        return
+        pytest.skip("Skipping in Python 2 as can't unpickle Python 3 data")
     
     buffer_file = 'tests/data/bk_image_data/bk_buffer.pickle'
-    image_file = 'tests/data/bk_image_data/image.pickle'
+    image_file = 'tests/data/bk_image_data/us_image.pickle'
 
     with open(buffer_file, 'rb') as f_buffer:
         buffer = pickle.load(f_buffer)
 
     with open(image_file, 'rb') as f_image:
         expected_image = pickle.load(f_image)
-
+    
+    # Set the correct image dimensions for decoding.
+    # The test image has dimensions of 892 x 728
+    bk_5000.parse_win_size_message("DATA:US_WIN_SIZE 892,728;")
     bk_5000.buffer = buffer
-    valid, image = bk_5000.receive_image()
-
-    assert valid
-    np.testing.assert_array_equal(image, expected_image)
+    bk_5000.get_frame()
+    
+    np.testing.assert_array_equal(bk_5000.img, expected_image)

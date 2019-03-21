@@ -31,10 +31,12 @@ class BK5000():
         self.request_stop_streaming = False
         self.is_streaming = False
         self.image_size = [0, 0]
+        self.pixels_in_image = 0
         self.buffer = bytearray()
         self.np_buffer = None
         self.result = None
-        self.valid = False
+        self.img = None
+        self.valid_frame = False
 
         self.control_bits = [1, 4, 27]
         self.flipped_control_bits = [bit ^ 0xFF for bit in self.control_bits]
@@ -187,6 +189,8 @@ class BK5000():
         logging.info("Parsing window size message %s", message)
         dim_part_of_message = message.split()[-1].strip(';').split(',')
         self.image_size = [int(s) for s in dim_part_of_message]
+        self.pixels_in_image = self.image_size[0] * self.image_size[1]
+
         logging.info("Window size: %s", self.image_size)
 
     def find_first_a_not_preceded_by_b(self, start_pos, a, b):
@@ -207,10 +211,13 @@ class BK5000():
         found = -1
 
         trimmed_buffer = self.np_buffer[start_pos:]
-        if trimmed_buffer[0] == a:
+        if trimmed_buffer[0] == a: # First item can't be preceded by anything
             found = 0
 
         else:
+
+            # Find all instances of a, then search within these values
+            # for one which isn't preceded by b
             a_idx = np.where(trimmed_buffer == a)[0]
             not_b_idx = np.where(trimmed_buffer[a_idx - 1] != b)[0]
 
@@ -260,6 +267,7 @@ class BK5000():
             idx = np.where(self.np_buffer[uc27_idx + 1] == bit)[0]
             idx_to_del = np.append(idx_to_del, uc27_idx[idx])
 
+        # Flip the bits that follow
         self.np_buffer[idx_to_del + 1] ^= 0xFF
 
         result = np.delete(self.np_buffer, idx_to_del)
@@ -270,6 +278,8 @@ class BK5000():
         """
         Scan the incoming data stream to find the start and end
         of the image data.
+
+        See BK doc PS12640-44 for further details.
         """
 
         # self.buffer contains the received TCP data
@@ -277,22 +287,22 @@ class BK5000():
         # Some operations are simpler to do on a bytearray than np array
         self.np_buffer = np.frombuffer(self.buffer, dtype=np.uint8)
 
-        valid = False
-        preceding_char_idx = self.find_first_a_not_preceded_by_b(0, 0x01, 0x27)
+        valid_frame = False
+        msg_start_idx = self.find_first_a_not_preceded_by_b(0, 0x01, 0x27)
 
-        if preceding_char_idx < 0:
+        if msg_start_idx < 0:
             logging.warning("Failed to find start of message character. \
                 This suggets there is junk in the buffer")
             self.buffer.clear()
-            return valid, None
+            return valid_frame
 
-        terminating_char_idx = self.find_first_a_not_preceded_by_b(
-            preceding_char_idx, 0x04, 0x27)
+        msg_end_idx = self.find_first_a_not_preceded_by_b(
+            msg_start_idx, 0x04, 0x27)
 
-        if terminating_char_idx <= preceding_char_idx:
+        if msg_end_idx <= msg_start_idx:
             logging.debug("Failed to find end of message character. \
                 This is OK if message is still incoming.")
-            return valid, None
+            return valid_frame
 
         # There isn't a standard way to do the buffer.find operation on a
         # numpy array e.g. find a sequence of values,
@@ -300,55 +310,55 @@ class BK5000():
 
         # utf-8 to be compatible with buffer
         img_msg = "DATA:GRAB_FRAME".encode('utf-8')
-        img_msg_index = self.buffer.find(img_msg, preceding_char_idx)
+        img_msg_index = self.buffer.find(img_msg, msg_start_idx)
 
         if not (img_msg_index != -1 and # i.e. it was found
-                preceding_char_idx < img_msg_index < terminating_char_idx):
+                msg_start_idx < img_msg_index < msg_end_idx):
 
             logging.warning("Received a non-image message, \
                     which I wasn't expecting.")
 
-            self.clear_bytes_in_buffer(0, terminating_char_idx + 1)
-            return valid, None
+            self.clear_bytes_in_buffer(0, msg_end_idx + 1)
+            return valid_frame
 
         logging.debug("Starting decode step.")
-        hash_char = self.buffer.find('#'.encode('utf-8'), preceding_char_idx)
+        hash_char = self.buffer.find('#'.encode('utf-8'), msg_start_idx)
         size_of_data_char = hash_char + 1
 
         start_image_char = size_of_data_char + \
                            1 + 4 + \
                            self.buffer[size_of_data_char] - ord('0') # ASCII
 
-        end_image_char = terminating_char_idx - 2
+        end_image_char = msg_end_idx - 2
 
         self.np_buffer = self.np_buffer[start_image_char:end_image_char + 1]
+
         result = self.decode_image()
 
-        logging.debug("Image received")
-        self.clear_bytes_in_buffer(0, terminating_char_idx + 1)
+        self.img = result[:self.pixels_in_image] \
+                  .reshape(self.image_size[1], self.image_size[0])
 
-        valid = True
-        return valid, result
+        logging.debug("Image received")
+        self.clear_bytes_in_buffer(0, msg_end_idx + 1)
+
+        valid_frame = True
+        return valid_frame
 
     def get_frame(self):
         """
         Get the next frame from the BK5000.
         """
-        self.valid = False
-
-        while not self.valid:
+        self.valid_frame = False
+        while not self.valid_frame:
             self.minimum_size = self.image_size[0] * self.image_size[1] + 22
 
             while len(self.buffer) < self.minimum_size:
                 self.buffer.extend(self.socket.recv(self.minimum_size))
 
+            valid_frame = self.receive_image()
 
-            valid, result = self.receive_image()
-            if valid:
-
-                self.result = result[:self.image_size[0] * self.image_size[1]] \
-                            .reshape(self.image_size[1], self.image_size[0]).T
-                self.valid = True
+            if valid_frame:
+                self.valid_frame = True
 
             else:
                 self.buffer.extend(self.socket.recv(self.packet_size))
@@ -371,5 +381,5 @@ if __name__ == "__main__":
 
     while True:
         bk.get_frame()
-        cv2.imshow('a', bk.result)
+        cv2.imshow('a', bk.img)
         cv2.waitKey(1)
