@@ -15,5 +15,5 @@ while True:
 
         if bk.valid:
             img_x, img_y = bk.image_size
-            image_message = ImageMessage(bk.result.reshape(img_y, img_x).T)
+            image_message = ImageMessage(bk.img)
             igtlink_server.add_message_to_send_queue(image_message)
