@@ -294,7 +294,7 @@ class BK5000():
             logging.warning("Failed to find start of message character. \
                 This suggets there is junk in the buffer")
             self.buffer.clear()
-            return valid_frame, None
+            return valid_frame
 
         msg_end_idx = self.find_first_a_not_preceded_by_b(
             msg_start_idx, 0x04, 0x27)
@@ -302,7 +302,7 @@ class BK5000():
         if msg_end_idx <= msg_start_idx:
             logging.debug("Failed to find end of message character. \
                 This is OK if message is still incoming.")
-            return valid_frame, None
+            return valid_frame
 
         # There isn't a standard way to do the buffer.find operation on a
         # numpy array e.g. find a sequence of values,
@@ -319,7 +319,7 @@ class BK5000():
                     which I wasn't expecting.")
 
             self.clear_bytes_in_buffer(0, msg_end_idx + 1)
-            return valid_frame, None
+            return valid_frame
 
         logging.debug("Starting decode step.")
         hash_char = self.buffer.find('#'.encode('utf-8'), msg_start_idx)
@@ -334,7 +334,7 @@ class BK5000():
         self.np_buffer = self.np_buffer[start_image_char:end_image_char + 1]
 
         result = self.decode_image()
-
+        
         self.img = result[:self.pixels_in_image] \
                   .reshape(self.image_size[1], self.image_size[0])
 
@@ -349,7 +349,7 @@ class BK5000():
         Get the next frame from the BK5000.
         """
         self.valid_frame = False
-
+        print("Getting")
         while not self.valid_frame:
             self.minimum_size = self.image_size[0] * self.image_size[1] + 22
 
