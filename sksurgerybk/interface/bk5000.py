@@ -349,7 +349,6 @@ class BK5000():
         Get the next frame from the BK5000.
         """
         self.valid_frame = False
-        print("Getting")
         while not self.valid_frame:
             self.minimum_size = self.image_size[0] * self.image_size[1] + 22
 
