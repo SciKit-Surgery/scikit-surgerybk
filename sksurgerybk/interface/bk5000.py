@@ -334,7 +334,7 @@ class BK5000():
         self.np_buffer = self.np_buffer[start_image_char:end_image_char + 1]
 
         result = self.decode_image()
-        
+
         self.img = result[:self.pixels_in_image] \
                   .reshape(self.image_size[1], self.image_size[0])
 
