@@ -413,6 +413,7 @@ class BKOpenCV:
             cv2.waitKey(1)
 
 if __name__ == "__main__":
+    #pylint:disable=import-error
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) > 1:
