@@ -178,7 +178,6 @@ class BK5000():
         self.receive_response_message(expected_size=25)
         self.parse_win_size_message(self.data.decode())
 
-
     def parse_win_size_message(self, message):
         """Extrack the size of the US window from the response message
 
