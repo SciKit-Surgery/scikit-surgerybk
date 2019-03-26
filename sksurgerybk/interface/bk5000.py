@@ -2,7 +2,10 @@
 
 import socket
 import logging
+import sys
 import numpy as np
+from sksurgerybk.pyigtlink.pyIGTLink import PyIGTLink, ImageMessage
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -174,7 +177,6 @@ class BK5000():
         self.send_command_message(query_win_size_message)
         self.receive_response_message(expected_size=25)
         self.parse_win_size_message(self.data.decode())
-
 
     def parse_win_size_message(self, message):
         """Extrack the size of the US window from the response message
@@ -364,22 +366,61 @@ class BK5000():
                 self.buffer.extend(self.socket.recv(self.packet_size))
 
 
-if __name__ == "__main__":
+class BKpyIGTLink:
+    """ Send BK data over OpenIGTLink. """
+    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=25):
+
+        self.bk5000 = BK5000(TIMEOUT, FPS)
+        self.bk5000.connect_to_host(TCP_IP, TCP_PORT)
+
+        self.igtlink_server = PyIGTLink(localServer=True)
+        self.active = True
+
+    def start(self):
+        """ Start acquisiton/streaming. """
+        self.bk5000.query_win_size()
+        self.bk5000.start_streaming()
+
+        while self.active:
+            if self.igtlink_server.is_connected():
+                self.bk5000.get_frame()
+
+                image_message = ImageMessage(self.bk5000.img)
+                self.igtlink_server.add_message_to_send_queue(image_message)
+
+    def stop(self):
+        """ Stop acquisition/streaming."""
+        self.active = False
+
+class BKOpenCV:
+    """ Display BK data using OpenCV."""
     #pylint:disable=no-member, invalid-name, import-error
-    import cv2
+
+    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=25):
+
+        self.bk5000 = BK5000(TIMEOUT, FPS)
+        self.bk5000.connect_to_host(TCP_IP, TCP_PORT)
+
+    def start(self):
+        """ Start acquisiton/streaming. """
+
+        self.bk5000.query_win_size()
+        self.bk5000.start_streaming()
+
+        while True:
+            self.bk5000.get_frame()
+            cv2.imshow('a', self.bk5000.img)
+            cv2.waitKey(1)
+
+if __name__ == "__main__":
+    #pylint:disable=import-error
     logging.basicConfig(level=logging.INFO)
 
-    TCP_IP = '128.16.0.3' # Default IP of BK5000
-    TCP_PORT = 7915       # Default port of BK5000
-    TIMEOUT = 5
-    FPS = 25
+    if len(sys.argv) > 1:
+        BK_IGTLINK = BKpyIGTLink()
+        BK_IGTLINK.start()
 
-    bk = BK5000(TIMEOUT, FPS)
-    bk.connect_to_host(TCP_IP, TCP_PORT)
-    bk.query_win_size()
-    bk.start_streaming()
-
-    while True:
-        bk.get_frame()
-        cv2.imshow('a', bk.img)
-        cv2.waitKey(1)
+    else:
+        import cv2
+        BK_OPENCV = BKOpenCV()
+        BK_OPENCV.start()
