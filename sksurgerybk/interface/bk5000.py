@@ -199,7 +199,7 @@ class BK5000():
     def query_scanarea(self):
         """ Query the BK5000 for the scan area.
         (width/height/scanning depth etc.) """
-        query_scanarea_message = "QUERY:GEOMETRY_SCANAREA:A;"
+        query_scanarea_message = "QUERY:B_GEOMETRY_SCANAREA:A;"
         self.send_command_message(query_scanarea_message)
         self.receive_response_message()
         self.parse_scanarea_message()
@@ -458,7 +458,7 @@ if __name__ == "__main__":
     # 'python bk5000.py' without any arguments wll run openCV
     # adding any argument will use IGTLink instead e.g.
     # 'python bk5000.py 1'
-    
+
     if len(sys.argv) > 1:
         BK_IGTLINK = BKpyIGTLink()
         BK_IGTLINK.start()

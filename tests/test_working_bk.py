@@ -1,9 +1,10 @@
 import pytest
 import time
 from sksurgerybk.interface.bk5000 import BK5000
+""" Tests to run if a working BK5000 is connected. """
 
-def test_framerate():
-
+@pytest.fixture(scope='module')
+def bk():
     bk = BK5000(timeout = 5, frames_per_second = 25)
 
     TCP_IP = '128.16.0.3' # Default IP of BK5000
@@ -16,8 +17,18 @@ def test_framerate():
     
     except:
         pytest.skip("No BK Available")
-        
+    
+    yield bk
+
+    bk.disconnect_from_host()
+
+def test_query_win_size(bk):
     bk.query_win_size()
+    assert bk.image_size[0] > 0
+    assert bk.image_size[1] > 0
+
+def test_framerate(bk):
+
     bk.start_streaming()
 
     # get 100 frames
@@ -39,6 +50,13 @@ def test_framerate():
 
     acceptable_difference = 0.1
     assert abs(expected_time - acqusition_time) < acceptable_difference
+
+def test_query_scanarea(bk):
+
+    bk.query_scanarea()
+    response_msg = bk.data.decode('utf-8')
+    assert response_msg.startswith("DATA:B_GEOMETRY_SCANAREA:A ")
+    assert bk.scan_geometry['StopDepth'] > 0
 
     
 
