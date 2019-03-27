@@ -36,6 +36,7 @@ class BK5000():
         self.np_buffer = None
         self.result = None
         self.img = None
+        self.scan_geometry = {}
         self.valid_frame = False
 
         self.control_bits = [1, 4, 27]
@@ -175,7 +176,6 @@ class BK5000():
         self.receive_response_message(expected_size=25)
         self.parse_win_size_message(self.data.decode())
 
-
     def parse_win_size_message(self, message):
         """Extrack the size of the US window from the response message
 
@@ -192,6 +192,43 @@ class BK5000():
         self.pixels_in_image = self.image_size[0] * self.image_size[1]
 
         logging.info("Window size: %s", self.image_size)
+
+    def query_scanarea(self):
+        """ Query the BK5000 for the scan area.
+        (width/height/scanning depth etc.) """
+        query_scanarea_message = "QUERY:GEOMETRY_SCANAREA:A;"
+        self.send_command_message(query_scanarea_message)
+        self.receive_response_message()
+        self.parse_scanarea_message()
+
+    def parse_scanarea_message(self):
+        #pylint:disable = bad-whitespace
+        """ Separate the scanarea response msssage into the separate
+        components.
+
+        Message has format:
+        <StartLineX>,<StartLineY>,<StartLineAngle>,<StartDepth>,
+        <StopLineX>,<StopLineY>,<StopLineAngle>,<StopDepth>
+
+        Example message:
+        DATA:B_GEOMETRY_SCANAREA:A 0.0017218,-0.000171398,
+        1.37236,0,-0.00174855,-0.000176821,1.77236,0.0203479; """
+
+        # Strip out the text part of the message, and the trailing ;
+        # Then split into the separate values and convert to float.
+        msg = self.data.decode('utf-8').strip("DATA:B_GEOMETRY_SCANAREA:A ") \
+                                       .strip(";")
+        values = [float(value) for value in msg.split(',')]
+
+        self.scan_geometry['StartLineX']        =  values[0]
+        self.scan_geometry['StartLineY']        =  values[1]
+        self.scan_geometry['StartLineAngle']    =  values[2]
+        self.scan_geometry['StartDepth']        =  values[3]
+        self.scan_geometry['StopLineX']         =  values[4]
+        self.scan_geometry['StopLineY']         =  values[5]
+        self.scan_geometry['StopDepthAngle']    =  values[6]
+        self.scan_geometry['StopDepth']         =  values[7]
+
 
     def find_first_a_not_preceded_by_b(self, start_pos, a, b):
         #pylint:disable=invalid-name
