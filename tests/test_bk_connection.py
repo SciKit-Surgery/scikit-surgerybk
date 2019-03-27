@@ -104,7 +104,7 @@ def test_query_win_size_raises_error(bk_5000):
     with pytest.raises(IOError):
         bk_5000.query_win_size()
 
-query_scanarea_message = b"QUERY:GEOMETRY_SCANAREA:A;"
+query_scanarea_message = b"QUERY:B_GEOMETRY_SCANAREA:A;"
 @mock.patch('socket.socket.send', return_value=len(query_scanarea_message) + 2)
 @mock.patch('socket.socket.recv', return_value= \
                 b'\x01DATA:B_GEOMETRY_SCANAREA:A 0.0017218,-0.000171398, \
