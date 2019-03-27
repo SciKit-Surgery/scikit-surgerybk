@@ -104,4 +104,30 @@ def test_query_win_size_raises_error(bk_5000):
     with pytest.raises(IOError):
         bk_5000.query_win_size()
 
+query_scanarea_message = b"QUERY:GEOMETRY_SCANAREA:A;"
+@mock.patch('socket.socket.send', return_value=len(query_scanarea_message) + 2)
+@mock.patch('socket.socket.recv', return_value= \
+                b'\x01DATA:B_GEOMETRY_SCANAREA:A 0.0017218,-0.000171398, \
+                1.37236,0,-0.00174855,-0.000176821,1.77236,0.0203479;\x04'
+                )
+def test_query_and_parse_scanarea(mocked_send, mocked_recv, bk_5000):
+        bk_5000.query_scanarea()
 
+        expected_values = [     0.0017218,
+                                -0.000171398,
+                                1.37236,
+                                0,
+                                -0.00174855,
+                                -0.000176821,
+                                1.77236,
+                                0.0203479
+                          ]
+                          
+        assert bk_5000.scan_geometry['StartLineX']      ==  expected_values[0]
+        assert bk_5000.scan_geometry['StartLineY']      ==  expected_values[1]
+        assert bk_5000.scan_geometry['StartLineAngle']  ==  expected_values[2]
+        assert bk_5000.scan_geometry['StartDepth']      ==  expected_values[3]
+        assert bk_5000.scan_geometry['StopLineX']       ==  expected_values[4]
+        assert bk_5000.scan_geometry['StopLineY']       ==  expected_values[5]
+        assert bk_5000.scan_geometry['StopDepthAngle']  ==  expected_values[6]
+        assert bk_5000.scan_geometry['StopDepth']       ==  expected_values[7]
