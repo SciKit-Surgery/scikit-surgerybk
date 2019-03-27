@@ -416,6 +416,11 @@ if __name__ == "__main__":
     #pylint:disable=import-error
     logging.basicConfig(level=logging.INFO)
 
+    # OpenCV or PyIGTLink can be selected from command line
+    # 'python bk5000.py' without any arguments wll run openCV
+    # adding any argument will use IGTLink instead e.g.
+    # 'python bk5000.py 1'
+    
     if len(sys.argv) > 1:
         BK_IGTLINK = BKpyIGTLink()
         BK_IGTLINK.start()
