@@ -3,6 +3,7 @@
 import socket
 import logging
 import sys
+import cv2
 import numpy as np
 from sksurgerybk.pyigtlink.pyIGTLink import PyIGTLink, ImageMessage
 
@@ -435,7 +436,6 @@ class BKOpenCV:
     #pylint:disable=no-member, invalid-name, import-error
 
     def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=25):
-
         self.bk5000 = BK5000(TIMEOUT, FPS)
         self.bk5000.connect_to_host(TCP_IP, TCP_PORT)
 
@@ -450,9 +450,8 @@ class BKOpenCV:
             cv2.imshow('a', self.bk5000.img)
             cv2.waitKey(1)
 
-if __name__ == "__main__":
-    #pylint:disable=import-error
-    logging.basicConfig(level=logging.INFO)
+def main():
+    """ Entry point for OpenCV/pyIGTLink. """
 
     # OpenCV or PyIGTLink can be selected from command line
     # 'python bk5000.py' without any arguments wll run openCV
@@ -460,10 +459,12 @@ if __name__ == "__main__":
     # 'python bk5000.py 1'
 
     if len(sys.argv) > 1:
-        BK_IGTLINK = BKpyIGTLink()
-        BK_IGTLINK.start()
+        bk_igtlink = BKpyIGTLink()
+        bk_igtlink.start()
 
     else:
-        import cv2
-        BK_OPENCV = BKOpenCV()
-        BK_OPENCV.start()
+        bk_opencv = BKOpenCV()
+        bk_opencv.start()
+
+if __name__ == "__main__":
+    main()
