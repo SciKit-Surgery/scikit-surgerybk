@@ -409,6 +409,7 @@ class BKpyIGTLink:
     """ Send BK data over OpenIGTLink. """
     def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=25):
 
+        logging.info("Creating BKpyIGTLink connection")
         self.bk5000 = BK5000(TIMEOUT, FPS)
         self.bk5000.connect_to_host(TCP_IP, TCP_PORT)
 
