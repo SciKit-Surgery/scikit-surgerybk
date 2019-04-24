@@ -28,7 +28,7 @@ IGTL_IMAGE_HEADER_VERSION = 1
 
 class PyIGTLink(SocketServer.TCPServer):
     """ For streaming data over TCP with IGTLink"""
-    def __init__(self, port=18905, localServer=False, iface='eth0'):
+    def __init__(self, port=18905, localServer=True, iface='eth0'):
         """
         port - port number
         """

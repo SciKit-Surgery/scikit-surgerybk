@@ -37,8 +37,9 @@ class BK5000():
         self.pixels_in_image = 0
         self.buffer = bytearray()
         self.np_buffer = None
-        self.result = None
         self.img = None
+        self.rgb_img = None
+        self.convert_to_rgb = False
         self.scan_geometry = {}
         self.valid_frame = False
 
@@ -377,6 +378,16 @@ class BK5000():
 
         self.img = result[:self.pixels_in_image] \
                   .reshape(self.image_size[1], self.image_size[0])
+
+        # The 'QUERY:GRAB_FRAME "ON"` gets the BK to stream
+        # greyscale data (e.g. 640 x 480 x 1),
+        #  some applications might want this in RGB format (640 x 480 x 3)
+        # Can convert by duplicating the data along the third dimension.
+        # np.dstack seems to be the quickest way to do this,
+        # compared to np.repeat
+
+        if self.convert_to_rgb:
+            self.rgb_img = np.dstack([self.img] * 3)
 
         logging.debug("Image received")
         self.clear_bytes_in_buffer(0, msg_end_idx + 1)

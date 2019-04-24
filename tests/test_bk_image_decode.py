@@ -88,7 +88,11 @@ def test_receive_image(bk_5000):
     # Set the correct image dimensions for decoding.
     # The test image has dimensions of 892 x 728
     bk_5000.parse_win_size_message("DATA:US_WIN_SIZE 892,728;")
+    bk_5000.convert_to_rgb = True
     bk_5000.buffer = buffer
     bk_5000.get_frame()
     
     np.testing.assert_array_equal(bk_5000.img, expected_image)
+
+    expected_rgb_image = np.dstack([expected_image] * 3)
+    np.testing.assert_array_equal(bk_5000.rgb_img, expected_rgb_image)
