@@ -51,6 +51,13 @@ class BK5000():
         logging.debug("Deleting object, closing socket")
         self.socket.close()
 
+    def enable_rgb_output(self):
+        """
+        The 'QUERY:GRAB_FRAME "ON"` gets the BK to stream
+        greyscale data (e.g. 640 x 480 x 1),
+         some applications might want this in RGB format (640 x 480 x 3)
+        """
+        self.convert_to_rgb = True
 
     def generate_command_message(self, message):
         #pylint:disable=no-self-use
@@ -379,10 +386,6 @@ class BK5000():
         self.img = result[:self.pixels_in_image] \
                   .reshape(self.image_size[1], self.image_size[0])
 
-        # The 'QUERY:GRAB_FRAME "ON"` gets the BK to stream
-        # greyscale data (e.g. 640 x 480 x 1),
-        #  some applications might want this in RGB format (640 x 480 x 3)
-        # Can convert by duplicating the data along the third dimension.
         # np.dstack seems to be the quickest way to do this,
         # compared to np.repeat
 

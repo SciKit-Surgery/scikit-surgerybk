@@ -88,7 +88,7 @@ def test_receive_image(bk_5000):
     # Set the correct image dimensions for decoding.
     # The test image has dimensions of 892 x 728
     bk_5000.parse_win_size_message("DATA:US_WIN_SIZE 892,728;")
-    bk_5000.convert_to_rgb = True
+    bk_5000.enable_rgb_output()
     bk_5000.buffer = buffer
     bk_5000.get_frame()
     
