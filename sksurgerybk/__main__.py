@@ -14,7 +14,7 @@ if __name__ == "__main__" and not __package__:
     sys.path.append(path.dirname(path.dirname(__file__)))
 
 # pylint: disable=wrong-import-position
-# from sksurgerybk.ui.sksurgerybk_command_line import main
-#
-# if __name__ == "__main__":
-#     sys.exit(main(sys.argv[1:]))
+from sksurgerybk.interface.bk5000 import main
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
