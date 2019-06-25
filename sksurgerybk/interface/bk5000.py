@@ -9,6 +9,7 @@ from sksurgerybk.pyigtlink.pyIGTLink import PyIGTLink, ImageMessage
 
 
 LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 class BK5000():
 #pylint:disable=too-many-instance-attributes
@@ -429,9 +430,13 @@ class BKpyIGTLink:
 
         self.igtlink_server = PyIGTLink(localServer=True)
         self.active = True
+        logging.info("Created BKpyIGTLink connection")
+
 
     def start(self):
         """ Start acquisiton/streaming. """
+
+        logging.info("Starting BKpyIGTLink.")
         self.bk5000.query_win_size()
         self.bk5000.start_streaming()
 
