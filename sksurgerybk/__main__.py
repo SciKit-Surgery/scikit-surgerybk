@@ -1,5 +1,7 @@
 #!/usr/bin/python
-#  -*- coding: utf-8 -*-
+#  -*- coding: utf-8 -*
+#pylint: disable=too-many-function-args
+
 """scikit-surgerybk"""
 
 import sys
