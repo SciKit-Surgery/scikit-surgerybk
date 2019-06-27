@@ -9,7 +9,7 @@ from sksurgerybk.pyigtlink.pyIGTLink import PyIGTLink, ImageMessage
 
 
 LOGGER = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 class BK5000():
 #pylint:disable=too-many-instance-attributes
