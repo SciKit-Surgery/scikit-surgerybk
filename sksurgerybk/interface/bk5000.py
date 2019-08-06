@@ -422,7 +422,7 @@ class BK5000():
 
 class BKpyIGTLink:
     """ Send BK data over OpenIGTLink. """
-    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=25):
+    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=8):
 
         logging.info("Creating BKpyIGTLink connection")
         self.bk5000 = BK5000(TIMEOUT, FPS)
@@ -446,6 +446,7 @@ class BKpyIGTLink:
 
                 image_message = ImageMessage(self.bk5000.img)
                 self.igtlink_server.add_message_to_send_queue(image_message)
+
 
     def stop(self):
         """ Stop acquisition/streaming."""

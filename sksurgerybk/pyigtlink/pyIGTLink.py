@@ -89,6 +89,7 @@ class PyIGTLink(SocketServer.TCPServer):
         if self._connected:
             with self.lock_server_thread:
                 self.message_queue.append(message)  # copy.deepcopy(message))
+
             while wait and len(self.message_queue) > 0:
                 time.sleep(0.001)
         else:
