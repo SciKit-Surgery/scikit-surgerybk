@@ -29,7 +29,7 @@ jobs:
           coverage erase
           coverage run -a --source ./sksurgerybk -m pytest -v -s ./tests/
           coverage report -m
-          pylint --rcfile=tests/pylintrc sksurgerybk tests
+          pylint --rcfile=tests/pylintrc sksurgerybk
 
       - name: Run coveralls
         run: |
