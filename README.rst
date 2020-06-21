@@ -1,22 +1,22 @@
 scikit-surgerybk
 ===============================
 
-.. image:: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/raw/master/project-icon.png
+.. image:: https://github.com/UCL/scikit-surgerybk /raw/master/project-icon.png
    :height: 128px
    :width: 128px
-   :target: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk
+   :target: https://github.com/UCL/scikit-surgerybk 
    :alt: Logo
 
-.. image:: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/badges/master/build.svg
-   :target: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/pipelines
-   :alt: GitLab-CI test status
+.. image:: https://github.com/UCL/scikit-surgerybk/workflows/.github/workflows/ci.yml/badge.svg
+   :target: https://github.com/UCL/scikit-surgerybk/actions
+   :alt: GitHub Actions CI statuss
 
-.. image:: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/badges/master/coverage.svg
-    :target: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/commits/master
+.. image:: https://coveralls.io/repos/github/UCL/scikit-surgerybk/badge.svg?branch=master&service=github
+    :target: https://coveralls.io/github/UCL/scikit-surgerybk?branch=master
     :alt: Test coverage
 
-.. image:: https://readthedocs.org/projects/scikit-surgerybk/badge/?version=latest
-    :target: http://scikit-surgerybk.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/scikit-surgerybk /badge/?version=latest
+    :target: http://scikit-surgerybk .readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 
@@ -38,7 +38,7 @@ You can clone the repository using the following command:
 
 ::
 
-    git clone https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk
+    git clone https://github.com/UCL/scikit-surgerybk
 
 
 Running tests
@@ -68,7 +68,7 @@ You can pip install directly from the repository as follows:
 
 ::
 
-    pip install git+https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk
+    pip install git+https://github.com/UCL/scikit-surgerybk
 
 
 
@@ -99,12 +99,12 @@ Supported by `Wellcome`_ and `EPSRC`_.
 
 
 .. _`Wellcome EPSRC Centre for Interventional and Surgical Sciences`: http://www.ucl.ac.uk/weiss
-.. _`source code repository`: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk
+.. _`source code repository`: https://github.com/UCL/scikit-surgerybk
 .. _`Documentation`: https://scikit-surgerybk.readthedocs.io
 .. _`SNAPPY`: https://weisslab.cs.ucl.ac.uk/WEISS/PlatformManagement/SNAPPY/wikis/home
 .. _`University College London (UCL)`: http://www.ucl.ac.uk/
 .. _`Wellcome`: https://wellcome.ac.uk/
 .. _`EPSRC`: https://www.epsrc.ac.uk/
-.. _`contributing guidelines`: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/blob/master/CONTRIBUTING.rst
-.. _`license file`: https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk/blob/master/LICENSE
+.. _`contributing guidelines`: https://github.com/UCL/scikit-surgerybkblob/master/CONTRIBUTING.rst
+.. _`license file`: https://github.com/UCL/scikit-surgerybkblob/master/LICENSE
 
