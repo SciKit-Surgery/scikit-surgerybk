@@ -17,7 +17,7 @@ setup(
     description='Python package for interfacing with BK Ultrasound machines',
     long_description=long_description,
     long_description_content_type='text/x-rst',
-    url='https://weisslab.cs.ucl.ac.uk/WEISS/SoftwareRepositories/SNAPPY/scikit-surgerybk',
+    url='https://github.com/UCL/scikit-surgerybk',
     author='Thomas Dowrick',
     author_email='YOUR-EMAIL@ucl.ac.uk',
     license='BSD-3 license',
