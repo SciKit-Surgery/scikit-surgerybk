@@ -103,7 +103,8 @@ class BK5000():
             return is_ok
         except socket.error as error_msg:
             raise IOError("An error: {:} has occured while trying to send \
-            the message: {:}.".format(error_msg, message_to_send))
+            the message: {:}.".format(error_msg, message_to_send)) \
+            from socket.error
 
     def receive_response_message(self, expected_size=1024):
         """Receive a message
@@ -180,7 +181,8 @@ class BK5000():
             self.socket.close()
             raise IOError(
                 "An error: {:} has occured while trying to connect to: {:} \
-            with port: {:}".format(error_msg, address, port))
+            with port: {:}".format(error_msg, address, port)) \
+            from socket.error
 
     def query_win_size(self):
         """ Query the BK5000 for the window/image size """
@@ -215,7 +217,6 @@ class BK5000():
         self.parse_scanarea_message()
 
     def parse_scanarea_message(self):
-        #pylint:disable = bad-whitespace
         """ Separate the scanarea response msssage into the separate
         components.
 
