@@ -96,14 +96,13 @@ class BK5000():
             if bytes_sent != len(message_to_send):
                 is_ok = False
                 raise IOError(
-                    "Failed to send message: {:} due to size mismatch: {:} \
-                different from {:} bytes sent.".format(message_to_send,
-                                                       len(message_to_send),
-                                                       bytes_sent))
+                    f"Failed to send message: {message_to_send} due to size \
+                            mismatch: {len(message_to_send)} \
+                            different from {bytes_sent} bytes sent.")
             return is_ok
         except socket.error as error_msg:
-            raise IOError("An error: {:} has occured while trying to send \
-            the message: {:}.".format(error_msg, message_to_send)) \
+            raise IOError(f"An error: {error_msg} has occured while trying \
+                    to send the message: {message_to_send}.") \
             from socket.error
 
     def receive_response_message(self, expected_size=1024):
@@ -121,10 +120,9 @@ class BK5000():
         if len(self.data) > expected_size:
             is_ok = False
             raise IOError(
-                "Failed to receive message: {:} due to size mismatch: {:} \
-            different from {:} bytes received.".format(self.data,
-                                                       len(self.data),
-                                                       expected_size))
+                f"Failed to receive message: {self.data} due to size \
+                        mismatch: {len(self.data)} \
+                        different from {expected_size} bytes received.")
         return is_ok
     def request_stop(self):
         """Set the appropriate class member"""
@@ -152,7 +150,7 @@ class BK5000():
         will throw errors if there is a problem with the socket connection.
          """
         stop_message = 'QUERY:GRAB_FRAME \"OFF\",{:};'.\
-        format(self.frames_per_second)
+        format(self.frames_per_second) #pylint:disable=consider-using-f-string
         self.send_command_message(stop_message)
         self.receive_response_message()
         self.is_streaming = False
@@ -161,7 +159,7 @@ class BK5000():
     def start_streaming(self):
         """ Send a message to start the streaming """
         start_message = 'QUERY:GRAB_FRAME \"ON\",{:};'.\
-        format(self.frames_per_second)
+        format(self.frames_per_second) #pylint:disable=consider-using-f-string
         self.send_command_message(start_message)
         self.receive_response_message()
         self.is_streaming = True
@@ -180,8 +178,8 @@ class BK5000():
         except socket.error as error_msg:
             self.socket.close()
             raise IOError(
-                "An error: {:} has occured while trying to connect to: {:} \
-            with port: {:}".format(error_msg, address, port)) \
+                f"An error: {error_msg} has occured while trying to connect \
+                        to: {address} with port: {port}") \
             from socket.error
 
     def query_win_size(self):
@@ -423,7 +421,7 @@ class BK5000():
 
 class BKpyIGTLink:
     """ Send BK data over OpenIGTLink. """
-    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=8):
+    def __init__(self, TCP_IP='128.16.0.3', TCP_PORT=7915, TIMEOUT=5, FPS=8): #pylint:disable=invalid-name
 
         logging.info("Creating BKpyIGTLink connection")
         self.bk5000 = BK5000(TIMEOUT, FPS)
